@@ -1,0 +1,31 @@
+variables:
+  cpu:
+    range: [0, 100]
+    terms:
+      Low:    {type: trapezoidal, params: [0, 0, 30, 50]}
+      Medium: {type: triangular,  params: [35, 55, 75]}
+      High:   {type: trapezoidal, params: [60, 80, 100, 100]}
+  latency:
+    range: [10, 1000]
+    terms:
+      Low:    {type: trapezoidal, params: [10, 10, 100, 250]}
+      Medium: {type: triangular,  params: [150, 400, 650]}
+      High:   {type: trapezoidal, params: [500, 800, 1000, 1000]}
+  replica_change:
+    range: [-3, 5]
+    terms:
+      Down:    {type: trapezoidal, params: [-3, -3, -1, 0]}
+      Hold:    {type: triangular,  params: [-1, 0, 2]}
+      UpSmall: {type: triangular,  params: [0, 2, 5]}
+      UpBig:   {type: trapezoidal, params: [2, 5, 5, 5]}
+
+rules:
+  - {cpu: Low,    latency: Low,    then: Down,    sugeno: -2}
+  - {cpu: Low,    latency: Medium, then: Hold,    sugeno: 0}
+  - {cpu: Low,    latency: High,   then: Hold,    sugeno: 0}
+  - {cpu: Medium, latency: Low,    then: Down,    sugeno: -1}
+  - {cpu: Medium, latency: Medium, then: Hold,    sugeno: 0}
+  - {cpu: Medium, latency: High,   then: UpSmall, sugeno: 2}
+  - {cpu: High,   latency: Low,    then: Hold,    sugeno: 0}
+  - {cpu: High,   latency: Medium, then: UpSmall, sugeno: 2}
+  - {cpu: High,   latency: High,   then: UpBig,   sugeno: 5}
